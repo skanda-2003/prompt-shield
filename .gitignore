@@ -1,1 +1,35 @@
 CLAUDE.md
+
+# virtual environment
+venv/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# data files — raw and processed CSVs can be large; exclude from git
+data/raw/
+data/processed/
+
+# model checkpoints — these are large binary files, push to HuggingFace Hub instead
+models/
+
+# environment variables
+.env
+
+# HuggingFace cache
+.cache/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
