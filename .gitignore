@@ -13,11 +13,10 @@ __pycache__/
 .ipynb_checkpoints/
 *.ipynb_checkpoints
 
-# data files — raw and processed CSVs can be large; exclude from git
+# raw data downloads
 data/raw/
-data/processed/
 
-# model checkpoints — these are large binary files, push to HuggingFace Hub instead
+# model checkpoints — large binary files, pushed to HuggingFace Hub instead
 models/
 
 # environment variables
