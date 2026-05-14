@@ -2,7 +2,7 @@
 
 A fine-tuned DistilBERT classifier that detects prompt injection and jailbreak attempts before they reach an LLM. It sits between the user and the model, classifying every incoming prompt as safe or unsafe in real time.
 
-**Live demo**: [huggingface.co/spaces/skanda-2003/promptshield](https://huggingface.co/spaces/skanda-2003/promptshield) *(coming soon)*
+**Live demo**: [huggingface.co/spaces/skandasuresh/promptshield](https://huggingface.co/spaces/skandasuresh/promptshield) *(coming soon)*
 
 ---
 

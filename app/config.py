@@ -2,4 +2,4 @@
 MODEL_SOURCE = "local"
 
 LOCAL_MODEL_PATH = "./models/promptshield"
-HUB_MODEL_NAME = "skanda-2003/promptshield"  # update before deployment
+HUB_MODEL_NAME = "skandasuresh/promptshield"
