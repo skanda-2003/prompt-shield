@@ -31,4 +31,7 @@ Thumbs.db
 
 # IDE
 .vscode/
-.idea/hf-space/
+.idea/
+
+# HuggingFace Spaces clone - local only, never commit
+hf-space/

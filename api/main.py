@@ -39,7 +39,12 @@ app = FastAPI(
 )
 
 
-# --- endpoint ---
+# --- endpoints ---
+
+@app.get("/health")
+def health():
+    return {"status": "ok"}
+
 
 @app.post("/classify", response_model=ClassifyResponse)
 def classify(request: ClassifyRequest) -> ClassifyResponse:
