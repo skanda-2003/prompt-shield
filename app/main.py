@@ -93,6 +93,8 @@ EXAMPLES = {
 
 if "prompt_input" not in st.session_state:
     st.session_state["prompt_input"] = ""
+if "last_result" not in st.session_state:
+    st.session_state["last_result"] = None
 
 st.write("**Try an example:**")
 cols = st.columns(len(EXAMPLES))
@@ -100,6 +102,7 @@ for col, (label, text) in zip(cols, EXAMPLES.items()):
     with col:
         if st.button(label, use_container_width=True):
             st.session_state["prompt_input"] = text
+            st.session_state["last_result"] = None  # clear stale result when loading a new example
             st.rerun()
 
 prompt = st.text_area(
@@ -114,17 +117,20 @@ if st.button("Check Prompt", type="primary"):
         st.warning("Please enter a prompt.")
     else:
         with st.spinner("Analysing..."):
-            result = classify(prompt, tokenizer, model, device)
+            st.session_state["last_result"] = classify(prompt, tokenizer, model, device)
 
-        if result["is_safe"]:
-            st.success("SAFE")
-        else:
-            st.error("UNSAFE")
+# display result outside the button block so it persists when example buttons trigger a rerun
+if st.session_state["last_result"] is not None:
+    result = st.session_state["last_result"]
+    if result["is_safe"]:
+        st.success("SAFE")
+    else:
+        st.error("UNSAFE")
 
-        # progress bar doubles as a visual confidence indicator
-        st.metric(label="Confidence", value=f"{result['confidence']:.1%}")
-        st.progress(result["confidence"])
+    # progress bar doubles as a visual confidence indicator
+    st.metric(label="Confidence", value=f"{result['confidence']:.1%}")
+    st.progress(result["confidence"])
 
-        if not result["is_safe"]:
-            label = ATTACK_LABELS.get(result["attack_type"], result["attack_type"])
-            st.warning(f"Detected: {label}")
+    if not result["is_safe"]:
+        attack_label = ATTACK_LABELS.get(result["attack_type"], result["attack_type"])
+        st.warning(f"Detected: {attack_label}")
