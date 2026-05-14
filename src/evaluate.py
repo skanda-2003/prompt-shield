@@ -17,7 +17,7 @@ PREDICTIONS_PATH = "data/processed/test_predictions.csv"
 MAX_LENGTH = 256  # must match train.py - tokens beyond this were truncated during training
 BATCH_SIZE = 32   # larger than training batch is fine - inference needs no gradient storage
 
-# the 5 named attack categories from CLAUDE.md
+# the 5 named attack categories PromptShield is evaluated against
 ATTACK_CATEGORIES = [
     "role_playing",
     "instruction_override",
