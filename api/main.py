@@ -1,4 +1,5 @@
 from contextlib import asynccontextmanager
+from typing import Annotated
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -9,10 +10,17 @@ from src.predict import predict
 
 # --- request / response models ---
 
+# single reusable type so both request models share the same prompt constraints
+_Prompt = Annotated[str, Field(min_length=1, max_length=4096)]
+
+
 class ClassifyRequest(BaseModel):
-    # Field() lets us add validation constraints alongside the type hint
-    # min_length=1 rejects empty strings; max_length=4096 prevents abuse
-    prompt: str = Field(..., min_length=1, max_length=4096)
+    prompt: _Prompt
+
+
+class BatchClassifyRequest(BaseModel):
+    # min_length=1 rejects an empty list; max_length=100 caps batch size
+    prompts: list[_Prompt] = Field(..., min_length=1, max_length=100)
 
 
 class ClassifyResponse(BaseModel):
@@ -57,8 +65,9 @@ def health():
 @app.post("/classify", response_model=ClassifyResponse)
 def classify(request: ClassifyRequest) -> ClassifyResponse:
     result = predict(request.prompt)
-    return ClassifyResponse(
-        is_safe=result["is_safe"],
-        confidence=result["confidence"],
-        attack_type=result["attack_type"],
-    )
+    return ClassifyResponse(**result)
+
+
+@app.post("/classify/batch", response_model=list[ClassifyResponse])
+def classify_batch(request: BatchClassifyRequest) -> list[ClassifyResponse]:
+    return [ClassifyResponse(**predict(p)) for p in request.prompts]
