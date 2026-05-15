@@ -69,9 +69,12 @@ def _assign_attack_type(text: str) -> str:
     ):
         return "instruction_override"
 
-    # prompt leaking: trying to extract the system prompt or prior instructions
+    # prompt leaking: trying to extract the system prompt or find out what the model was told
     if re.search(
-        r"\b(repeat|print|show|reveal|output|tell me).{0,30}\b(above|previous|system|prompt|instruction)\b",
+        r"\b(repeat|print|show|reveal|output|tell me).{0,30}\b(above|previous|system|prompt|instruction)\b"
+        r"|\b(what|tell|show)\b.{0,50}\b(system prompt|initial prompt|original instructions?|context window)\b"
+        r"|\bwhat (is|are|was|were).{0,30}(your|the).{0,20}(prompt|instruction|guideline|directive)\b"
+        r"|\b(what|tell me).{0,30}\b(your instructions|you were (told|given|instructed|programmed))\b",
         t,
     ):
         return "prompt_leaking"
@@ -80,8 +83,16 @@ def _assign_attack_type(text: str) -> str:
     if re.search(r"\b(base64|rot13|decode|encoded|cipher)\b", t):
         return "encoded_attacks"
 
-    # context manipulation: instructions hidden inside documents, code blocks, or tags
-    if re.search(r"(```|\[system\]|<instructions>|note:|important:).{0,50}(ignore|follow|must|shall)", t):
+    # context manipulation: instructions hidden inside documents, code blocks, tags, or structured content
+    if re.search(
+        r"(```|\[system\]|<instructions>|note:|important:).{0,50}(ignore|follow|must|shall)"
+        r"|<\s*(system|sys|instructions?|admin|root)\s*>"
+        r"|\[(system|sys|instructions?|admin|override|inst)\]"
+        r"|(note|important|notice|attention|warning)\s*:.{0,100}(ignore|disregard|forget|override|bypass)"
+        r"|<!--.{0,200}(ignore|disregard|override|bypass).{0,100}-->"
+        r"|(summarize|translate|analyze|review|read|process).{0,400}(ignore|disregard|forget|override|bypass).{0,80}(instruction|prompt|rule|previous|above)",
+        t,
+    ):
         return "context_manipulation"
 
     # unsafe but didn't match any known pattern
