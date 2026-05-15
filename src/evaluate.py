@@ -77,7 +77,7 @@ def tune_threshold(probs, labels):
     """
     Try thresholds from 0.30 to 0.70 in steps of 0.05.
     Returns the threshold with the best macro F1 on the validation set.
-    We do this on val (not test) so the threshold decision doesn't leak into evaluation.
+    I do this on val (not test) so the threshold decision doesn't leak into evaluation.
     """
     best_threshold = 0.5
     best_f1 = 0.0

@@ -9,7 +9,7 @@ from transformers import DistilBertForSequenceClassification, DistilBertTokenize
 # anchor to this file's location so the path works regardless of where Python is run from
 MODEL_PATH = str(Path(__file__).parent.parent / "models" / "promptshield")
 MAX_LENGTH = 256   # must match train.py - same truncation used during training
-THRESHOLD = 0.45   # tuned on validation set in evaluate.py - 0.45 gave best macro F1
+THRESHOLD = 0.60   # tuned on validation set in evaluate.py - 0.60 gave best macro F1 on expanded dataset
 
 # module-level cache so the model is loaded once and reused on every call
 _tokenizer = None
@@ -69,9 +69,12 @@ def _assign_attack_type(text: str) -> str:
     ):
         return "instruction_override"
 
-    # prompt leaking: trying to extract the system prompt or prior instructions
+    # prompt leaking: trying to extract the system prompt or find out what the model was told
     if re.search(
-        r"\b(repeat|print|show|reveal|output|tell me).{0,30}\b(above|previous|system|prompt|instruction)\b",
+        r"\b(repeat|print|show|reveal|output|tell me).{0,30}\b(above|previous|system|prompt|instruction)\b"
+        r"|\b(what|tell|show)\b.{0,50}\b(system prompt|initial prompt|original instructions?|context window)\b"
+        r"|\bwhat (is|are|was|were).{0,30}(your|the).{0,20}(prompt|instruction|guideline|directive)\b"
+        r"|\b(what|tell me).{0,30}\b(your instructions|you were (told|given|instructed|programmed))\b",
         t,
     ):
         return "prompt_leaking"
@@ -80,8 +83,16 @@ def _assign_attack_type(text: str) -> str:
     if re.search(r"\b(base64|rot13|decode|encoded|cipher)\b", t):
         return "encoded_attacks"
 
-    # context manipulation: instructions hidden inside documents, code blocks, or tags
-    if re.search(r"(```|\[system\]|<instructions>|note:|important:).{0,50}(ignore|follow|must|shall)", t):
+    # context manipulation: instructions hidden inside documents, code blocks, tags, or structured content
+    if re.search(
+        r"(```|\[system\]|<instructions>|note:|important:).{0,50}(ignore|follow|must|shall)"
+        r"|<\s*(system|sys|instructions?|admin|root)\s*>"
+        r"|\[(system|sys|instructions?|admin|override|inst)\]"
+        r"|(note|important|notice|attention|warning)\s*:.{0,100}(ignore|disregard|forget|override|bypass)"
+        r"|<!--.{0,200}(ignore|disregard|override|bypass).{0,100}-->"
+        r"|(summarize|translate|analyze|review|read|process).{0,400}(ignore|disregard|forget|override|bypass).{0,80}(instruction|prompt|rule|previous|above)",
+        t,
+    ):
         return "context_manipulation"
 
     # unsafe but didn't match any known pattern
@@ -89,14 +100,7 @@ def _assign_attack_type(text: str) -> str:
 
 
 def predict(prompt: str) -> dict:
-    """
-    Run inference on a single prompt string.
-
-    Returns a dict with three keys:
-      - is_safe (bool): True if the prompt is safe, False if it is an attack
-      - confidence (float): probability of the predicted class, rounded to 4 decimal places
-      - attack_type (str | None): one of the 5 attack categories, "unknown", or None if safe
-    """
+    """Run inference on a single prompt. Returns is_safe, confidence, and attack_type."""
     _load_model()
 
     # tokenize with the same settings used in train.py
