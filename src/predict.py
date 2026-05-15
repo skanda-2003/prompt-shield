@@ -9,7 +9,7 @@ from transformers import DistilBertForSequenceClassification, DistilBertTokenize
 # anchor to this file's location so the path works regardless of where Python is run from
 MODEL_PATH = str(Path(__file__).parent.parent / "models" / "promptshield")
 MAX_LENGTH = 256   # must match train.py - same truncation used during training
-THRESHOLD = 0.45   # tuned on validation set in evaluate.py - 0.45 gave best macro F1
+THRESHOLD = 0.60   # tuned on validation set in evaluate.py - 0.60 gave best macro F1 on expanded dataset
 
 # module-level cache so the model is loaded once and reused on every call
 _tokenizer = None
@@ -100,14 +100,7 @@ def _assign_attack_type(text: str) -> str:
 
 
 def predict(prompt: str) -> dict:
-    """
-    Run inference on a single prompt string.
-
-    Returns a dict with three keys:
-      - is_safe (bool): True if the prompt is safe, False if it is an attack
-      - confidence (float): probability of the predicted class, rounded to 4 decimal places
-      - attack_type (str | None): one of the 5 attack categories, "unknown", or None if safe
-    """
+    """Run inference on a single prompt. Returns is_safe, confidence, and attack_type."""
     _load_model()
 
     # tokenize with the same settings used in train.py

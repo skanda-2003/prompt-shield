@@ -10,7 +10,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from app.config import HUB_MODEL_NAME, LOCAL_MODEL_PATH, MODEL_SOURCE
 from src.predict import _assign_attack_type
 
-THRESHOLD = 0.45   # must match evaluate.py - tuned on validation set
+THRESHOLD = 0.60   # must match evaluate.py - tuned on validation set, 0.60 on expanded dataset
 MAX_LENGTH = 256   # must match train.py - same truncation used during training
 
 # resolve the model path once at module load time
@@ -24,12 +24,7 @@ else:
 
 @st.cache_resource
 def load_model():
-    """
-    Load tokenizer and model once and cache them for the lifetime of the app.
-    st.cache_resource is Streamlit's equivalent of a module-level singleton -
-    the function runs once and every subsequent call returns the cached objects.
-    Without this, the model would reload on every user interaction.
-    """
+    """Load tokenizer and model once; st.cache_resource means this runs exactly once per session."""
     tokenizer = DistilBertTokenizerFast.from_pretrained(_model_path)
     model = DistilBertForSequenceClassification.from_pretrained(_model_path)
     model.eval()  # disable dropout for deterministic inference
