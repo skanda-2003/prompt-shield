@@ -66,7 +66,7 @@ def get_probabilities(texts, tokenizer, model, device):
             outputs = model(input_ids=input_ids, attention_mask=attention_mask)
 
         # softmax converts raw logits into probabilities that sum to 1
-        # we take column 1 = P(unsafe), which is what we threshold against
+        # column 1 = P(unsafe), which is what gets thresholded
         probs = torch.softmax(outputs.logits, dim=-1)[:, 1]
         all_probs.extend(probs.cpu().numpy())
 

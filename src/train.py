@@ -113,7 +113,7 @@ def main():
         output_dir=OUTPUT_DIR,
         num_train_epochs=EPOCHS,
         per_device_train_batch_size=BATCH_SIZE,
-        # eval doesn't need gradient storage, so we can fit a larger batch
+        # eval doesn't need gradient storage, so a larger batch fits
         per_device_eval_batch_size=BATCH_SIZE * 2,
         learning_rate=LEARNING_RATE,
         # warmup gradually increases LR from 0 to 2e-5 over the first 100 steps

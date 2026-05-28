@@ -10,7 +10,6 @@ def clean_text(df):
     return df
 
 def split_data(df):
-    # split the data into training and testing sets
     train_df, temp = train_test_split(df, test_size=0.2, stratify=df['label'], random_state=42)
     val_df, test_df = train_test_split(temp, test_size=0.5, stratify=temp['label'], random_state=42)
     return train_df, val_df, test_df

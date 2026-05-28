@@ -15,7 +15,7 @@ MAX_LENGTH = 256   # must match train.py - same truncation used during training
 
 # resolve the model path once at module load time
 # lstrip("./") turns "./models/promptshield" into "models/promptshield"
-# then we anchor it to the project root so it works regardless of CWD
+# anchor to the project root so it works regardless of CWD
 if MODEL_SOURCE == "local":
     _model_path = str(Path(__file__).parent.parent / LOCAL_MODEL_PATH.lstrip("./"))
 else:
